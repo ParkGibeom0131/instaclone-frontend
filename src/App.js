@@ -9,6 +9,9 @@ import NotFound from "./screens/NotFound";
 import { darkModeVar, isLoggedInVar } from './apollo';
 import { ThemeProvider } from "styled-components";
 import { darkTheme, lightTheme, GlobalStyles } from "./styles";
+import SignUp from "./screens/SignUp";
+import routes from './screens/routes';
+import { HelmetProvider } from "react-helmet-async";
 
 function App() {
   const isLoggedIn = useReactiveVar(isLoggedInVar);
@@ -17,19 +20,26 @@ function App() {
   // Props를 계속해서 전달하는 걸 원하지 않기 때문에 사용
 
   return (
-    <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
-      <GlobalStyles />
-      <Router>
-        <Switch>
-          <Route path="/" exact>
-            {isLoggedIn ? (<Home />) : (<Login />)}
-          </Route>
-          <Route>
-            <NotFound />
-          </Route>
-        </Switch>
-      </Router>
-    </ThemeProvider>
+    <HelmetProvider>
+      <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
+        <GlobalStyles />
+        <Router>
+          <Switch>
+            <Route path={routes.home} exact>
+              {isLoggedIn ? (<Home />) : (<Login />)}
+            </Route>
+            {!isLoggedIn ? (
+              <Route path={routes.signUp}>
+                <SignUp />
+              </Route>
+            ) : null}
+            <Route>
+              <NotFound />
+            </Route>
+          </Switch>
+        </Router>
+      </ThemeProvider>
+    </HelmetProvider>
   );
 }
 
