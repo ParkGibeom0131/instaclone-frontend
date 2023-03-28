@@ -1,7 +1,7 @@
 // import { HashRouter as Router, Route, Switch } from "react-router-dom";
 // HashRouter, BrowserRouter: HashRouter가 deploy하기 훨씬 쉬움
 // BrowserRouter의 경우 deploy할 때 몇 가지 고려 사항이 생김
-import { useReactiveVar } from "@apollo/client";
+import { ApolloProvider, useReactiveVar } from "@apollo/client";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Home from './screens/Home';
 import Login from "./screens/Login";
@@ -12,6 +12,8 @@ import { darkTheme, lightTheme, GlobalStyles } from "./styles";
 import SignUp from "./screens/SignUp";
 import routes from './screens/routes';
 import { HelmetProvider } from "react-helmet-async";
+import { client } from './apollo';
+import Layout from './components/Layout';
 
 function App() {
   const isLoggedIn = useReactiveVar(isLoggedInVar);
@@ -20,26 +22,34 @@ function App() {
   // Props를 계속해서 전달하는 걸 원하지 않기 때문에 사용
 
   return (
-    <HelmetProvider>
-      <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
-        <GlobalStyles />
-        <Router>
-          <Switch>
-            <Route path={routes.home} exact>
-              {isLoggedIn ? (<Home />) : (<Login />)}
-            </Route>
-            {!isLoggedIn ? (
-              <Route path={routes.signUp}>
-                <SignUp />
+    <ApolloProvider client={client}>
+      <HelmetProvider>
+        <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
+          <GlobalStyles />
+          <Router>
+            <Switch>
+              <Route path={routes.home} exact>
+                {isLoggedIn ? (
+                  <Layout>
+                    <Home />
+                  </Layout>
+                ) : (
+                  <Login />
+                )}
               </Route>
-            ) : null}
-            <Route>
-              <NotFound />
-            </Route>
-          </Switch>
-        </Router>
-      </ThemeProvider>
-    </HelmetProvider>
+              {!isLoggedIn ? (
+                <Route path={routes.signUp}>
+                  <SignUp />
+                </Route>
+              ) : null}
+              <Route>
+                <NotFound />
+              </Route>
+            </Switch>
+          </Router>
+        </ThemeProvider>
+      </HelmetProvider>
+    </ApolloProvider>
   );
 }
 
