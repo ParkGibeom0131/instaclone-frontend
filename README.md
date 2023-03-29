@@ -22,6 +22,27 @@
 - [✔] Authentication
 - [✔] Architecture
 - [✔] Styles
-- [] Log In / Sign Up
+- [✔] Log In / Sign Up
 
 - []
+
+# Sanitize HTML
+
+<pre><code>
+dangerouslySetInnerHTML={{
+    __html: cleanedPayload,
+}}
+
+const cleanedPayload = sanitizeHtml(payload.replace(/#[ㄱ-ㅎ|ㅏ-ㅣ|가-힣|\w]+/g, "<mark>$&</mark>"), {
+        allowedTags: ["mark"],
+});
+</code></pre>
+
+- reactjs component를 넣을 수 없음
+
+# Arch. Comments
+
+- feed의 photo는 id를 가지고 있음
+- 댓글 부분에는 Comments라는 component가 있음
+- Comments component는 photo의 id를 받을 것임
+- Comments component는 Comment로 photo의 id를 보낼 것임

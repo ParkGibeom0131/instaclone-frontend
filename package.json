@@ -20,6 +20,7 @@
     "react-hook-form": "^7.43.8",
     "react-router-dom": "^5.3.4",
     "react-scripts": "5.0.1",
+    "sanitize-html": "^2.10.0",
     "styled-components": "^5.3.9",
     "styled-reset": "^4.4.5",
     "web-vitals": "^2.1.4"

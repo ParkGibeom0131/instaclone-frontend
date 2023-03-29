@@ -7,6 +7,7 @@ import Avatar from './../Avatar';
 import { FatText } from './../shared';
 import { gql } from '@apollo/client';
 import { useMutation } from '@apollo/client';
+import Comments from './Comments';
 
 const TOGGLE_LIKE_MUTATION = gql`
     mutation toggleLike($id: Int!) {
@@ -67,8 +68,7 @@ const Likes = styled(FatText)`
     display: block;
 `;
 
-
-function Photo({ id, user, file, isLiked, likes }) {
+function Photo({ id, user, file, isLiked, likes, caption, commentNumber, comments }) {
     const updateToggleLike = (cache, result) => {
         const {
             data: {
@@ -76,30 +76,48 @@ function Photo({ id, user, file, isLiked, likes }) {
             },
         } = result;
         if (ok) {
-            const fragmentId = `Photo:${id}`;
-            const fragment = gql`
-                fragment BSName on Photo {
-                    isLiked
-                    likes
-                }
-            `;
-            const result = cache.readFragment({
-                id: fragmentId,
-                fragment,
-            });
-            if ("isLiked" in result && "likes" in result) {
-                const { isLiked: cacheIsLiked, likes: cacheLikes } = result;
-                //Local scope안에 있기 때문에 props에 있는 것과 다름
-                cache.writeFragment({
-                    // fragment, write => cache에서 특정 object의 일부분을 수정
-                    id: fragmentId,
-                    fragment,
-                    data: {
-                        isLiked: !cacheIsLiked,
-                        likes: cacheIsLiked ? cacheLikes - 1 : cacheLikes + 1,
+            const photoId = `Photo:${id}`;
+
+            // fragment를 이용하여 cache 업데이트
+            // const fragment = gql`
+            //     fragment BSName on Photo {
+            //         isLiked
+            //         likes
+            //     }
+            // `;
+            // const result = cache.readFragment({
+            //     id: fragmentId,
+            //     fragment,
+            // });
+            // if ("isLiked" in result && "likes" in result) {
+            //     const { isLiked: cacheIsLiked, likes: cacheLikes } = result;
+            //     //Local scope안에 있기 때문에 props에 있는 것과 다름
+            //     cache.writeFragment({
+            //         // fragment, write => cache에서 특정 object의 일부분을 수정
+            //         id: fragmentId,
+            //         fragment,
+            //         data: {
+            //             isLiked: !cacheIsLiked,
+            //             likes: cacheIsLiked ? cacheLikes - 1 : cacheLikes + 1,
+            //         },
+            //     });
+            // }
+
+            //Apollo 3 버전에서 새롭게 생긴 cache 업데이트 기능
+            cache.modify({
+                id: photoId,
+                fields: {
+                    isLiked(prev) {
+                        return !prev;
                     },
-                });
-            }
+                    likes(prev) {
+                        if (isLiked) {
+                            return prev - 1;
+                        }
+                        return prev + 1;
+                    },
+                },
+            });
         }
     };
     const [toggleLikeMutation] = useMutation(TOGGLE_LIKE_MUTATION, {
@@ -141,6 +159,13 @@ function Photo({ id, user, file, isLiked, likes }) {
                     </div>
                 </PhotoActions>
                 <Likes>{`좋아요 ${likes}개`}</Likes>
+                <Comments
+                    photoId={id}
+                    author={user.username}
+                    caption={caption}
+                    commentNumber={commentNumber}
+                    comments={comments}
+                />
             </PhotoData>
         </PhotoContainer >
     );
@@ -152,9 +177,11 @@ Photo.propTypes = {
         avatar: PropTypes.string,
         username: PropTypes.string.isRequired
     }),
+    caption: PropTypes.string,
     file: PropTypes.string.isRequired,
     isLiked: PropTypes.bool.isRequired,
     likes: PropTypes.number.isRequired,
-}
+    commentNumber: PropTypes.number.isRequired,
+};
 
 export default Photo;
