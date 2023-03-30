@@ -14,6 +14,7 @@ import routes from './screens/routes';
 import { HelmetProvider } from "react-helmet-async";
 import { client } from './apollo';
 import Layout from './components/Layout';
+import Profile from './screens/Profile';
 
 function App() {
   const isLoggedIn = useReactiveVar(isLoggedInVar);
@@ -42,6 +43,11 @@ function App() {
                   <SignUp />
                 </Route>
               ) : null}
+              <Route path={`/users/:username`}>
+                <Layout>
+                  <Profile />
+                </Layout>
+              </Route>
               <Route>
                 <NotFound />
               </Route>
